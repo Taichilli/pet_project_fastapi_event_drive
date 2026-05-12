@@ -11,3 +11,5 @@ async def health():
 @app.on_event("startup")
 async def on_startup():
     print("Auth service started")
+
+

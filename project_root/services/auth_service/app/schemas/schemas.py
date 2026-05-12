@@ -1,20 +1,22 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,Field
 from typing import Optional
 
 class UserBase(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    name: str = Field(...,min_length=3,max_length=50)
+    email: EmailStr
 
 class CreateUser(UserBase):
+    password: str = Field(...,min_length=8,max_length=40)
+
+class UpdateUser(BaseModel):
+    password: Optional[str] = Field(None,min_length=8,max_length=40)
+    name: Optional[str] = Field(None,min_length=3,max_length=50)
+    email: Optional[EmailStr] = None
+
+class UserRead(BaseModel):
+    id: int
     name: str
     email: EmailStr
-    password: str
-
-class UpdateUser(UserBase):
-    password: Optional[str] = None
-
-class UserRead(UserBase):
-    id: int
 
     class Config:
         orm_mode = True

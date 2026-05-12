@@ -6,7 +6,9 @@ psycopg[binary]
 psycopg2-binary
 alembic
 pydantic
+email-validator
 pydantic-settings
 python-jose
-passlib[bcrypt]
+passlib[argon2]
 aio-pika
+pyjwt

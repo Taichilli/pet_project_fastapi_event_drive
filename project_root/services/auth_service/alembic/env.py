@@ -1,18 +1,15 @@
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context
 from app.core.config import settings
 from app.db.base import Base
-from app.models.users import User
-from app.models.refresh_tokens import RefreshToken
 
 config = context.config
 
 config.set_main_option(
-    "sqlalchemy.url",
-    settings.DATABASE_URL.replace("+asyncpg", "+psycopg")
+    "sqlalchemy.url", settings.DATABASE_URL.replace("+asyncpg", "+psycopg")
 )
 
 if config.config_file_name is not None:

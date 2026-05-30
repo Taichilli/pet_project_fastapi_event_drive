@@ -1,12 +1,13 @@
-from app.core.security import hash_password, verify_password
 from app.repositories.users_repository import UserRepository
-from app.schemas.schemas import CreateUser
-from fastapi import HTTPException, WebSocketException
+from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.security import hash_password
+from app.schemas.schemas import CreateUser, UpdateUser
 
 
 class UserServices:
-
     def __init__(self, repo: UserRepository):
         self.repo = repo
 
@@ -18,21 +19,53 @@ class UserServices:
 
         hashed_password = hash_password(user.password)
 
-        new_users = await self.repo.create_user(
-            db,
-            user.name,
-            user.email,
-            hashed_password
+        new_user = await self.repo.create_user(
+            db, user.name, user.email, hashed_password
         )
 
         try:
             await db.commit()
-            await db.refresh(new_users)
-        except IntegrityError:
+            await db.refresh(new_user)
+        except IntegrityError as err:
             await db.rollback()
-            raise HTTPException(status_code=400, detail="User already exists")
-        except OperationalError:
+            raise HTTPException(status_code=400, detail="User already exists") from err
+        except OperationalError as err:
             await db.rollback()
-            raise HTTPException(status_code=500, detail="Database error")
+            raise HTTPException(status_code=500, detail="Database error") from err
 
-        return new_users
+        return new_user
+
+    async def update_user(self, db: AsyncSession, user_id: int, data: UpdateUser):
+        user = await self.repo.get_user_by_id(db, user_id)
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if data.name:
+            user.name = data.name
+
+        if data.email:
+            user.email = data.email
+
+        if data.password:
+            user.hashed_password = hash_password(data.password)
+
+        try:
+            await db.commit()
+            await db.refresh(user)
+        except IntegrityError as err:
+            await db.rollback()
+            raise HTTPException(status_code=400, detail="User already exists") from err
+
+        return user
+
+    async def delete_user(self, db, user_id):
+        user = await self.repo.get_user_by_id(db, user_id)
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        await self.repo.delete_user(db, user)
+        await db.commit()
+
+        return {"message": "deleted"}

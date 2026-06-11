@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 from fastapi import HTTPException
-from jose import ExpiredSignatureError, JWTError, jwt
+from jose import JWTError, ExpiredSignatureError, jwt
 from fastapi import HTTPException
 
 load_dotenv()

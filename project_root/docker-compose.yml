@@ -1,6 +1,9 @@
 services:
   auth_service:
     build: ./services/auth_service
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./services/auth_service:/app
     ports:
       - "8001:8000"
     depends_on:

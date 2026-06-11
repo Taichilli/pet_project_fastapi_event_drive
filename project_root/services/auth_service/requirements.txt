@@ -8,7 +8,6 @@ alembic
 pydantic
 email-validator
 pydantic-settings
-python-jose
+python-jose[cryptography]
 passlib[argon2]
 aio-pika
-pyjwt

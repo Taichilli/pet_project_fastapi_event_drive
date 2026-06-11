@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from app.repositories.users_repository import UserRepository
+from app.repositories.user_repo import UserRepository
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession

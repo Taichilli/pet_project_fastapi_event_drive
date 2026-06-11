@@ -8,7 +8,7 @@ from app.db.session import get_db
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
-from jwt import ExpiredSignatureError, JWTError
+from jose import JWTError, ExpiredSignatureError, jwt
 
 
 

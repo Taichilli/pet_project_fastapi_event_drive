@@ -5,7 +5,6 @@ from sqlalchemy import DateTime, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.models.refresh_tokens import RefreshToken
 
 
 class User(Base):
@@ -21,6 +20,4 @@ class User(Base):
         nullable=False,
     )
 
-    refresh_tokens: Mapped[List["RefreshToken"]] = relationship(
-        "RefreshToken", back_populates="user"
-    )
+    refresh_tokens = relationship("RefreshToken", back_populates="user")

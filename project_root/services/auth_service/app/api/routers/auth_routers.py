@@ -43,7 +43,7 @@ async def login_user(
         key="refresh_token",
         value=login_response["refresh_token"],
         httponly=True,
-        secure=True,
+        secure=False,
         samesite="Lax",
         max_age=7 * 24 * 60 * 60,
 
@@ -59,10 +59,15 @@ async def login_user(
 @router.post("/refresh", response_model=Token)
 async def refresh_user(
         response: Response,
-        refresh_token: Annotated[str, Cookie()],
+        refresh_token: Annotated[str | None, Cookie()] = None,
         db: AsyncSession = Depends(get_db),
         service: AuthService = Depends(get_auth_service),
 ):
+        if not refresh_token:
+            raise HTTPException(
+                status_code=401,
+                detail="No refresh token"
+        )
 
         refresh_token_response = await service.refresh_token(db,refresh_token)
 
@@ -70,7 +75,7 @@ async def refresh_user(
             key="refresh_token",
             value=refresh_token_response["refresh_token"],
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="Lax",
             max_age=7 * 24 * 60 * 60,
         )
@@ -83,17 +88,23 @@ async def refresh_user(
 @router.post("/logout",response_model=MessageResponse)
 async def logout(
         response: Response,
-        refresh_token: Annotated[str, Cookie()],
+        refresh_token: Annotated[str | None, Cookie()] = None,
         db: AsyncSession = Depends(get_db),
         service: AuthService = Depends(get_auth_service),
 
 ):
+        if not refresh_token:
+            raise HTTPException(
+                status_code=401,
+                detail="No refresh token"
+        )
+
         await service.logout(db,refresh_token)
 
         response.delete_cookie(
             key="refresh_token",
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="Lax",
         )
 
@@ -103,19 +114,22 @@ async def logout(
 @router.post("/logout-all",response_model=MessageResponse)
 async def logout_all(
         response: Response,
-        refresh_token: Annotated[str, Cookie()],
+        refresh_token: Annotated[str | None, Cookie()] = None,
         db: AsyncSession = Depends(get_db),
         service: AuthService = Depends(get_auth_service),
 ):
         if not refresh_token:
-            raise HTTPException(status_code=401, detail="No token provided")
+            raise HTTPException(
+                status_code=401,
+                detail="No refresh token"
+        )
 
         await service.logout_all(db,refresh_token)
 
         response.delete_cookie(
             key="refresh_token",
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="Lax",
         )
 

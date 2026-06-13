@@ -55,7 +55,7 @@ class AuthService:
     async def refresh_token(self, db: AsyncSession, raw_refresh_token: str):
 
         rehash_token = hash_refresh_token(raw_refresh_token)
-        search_in_db_token = await self.t_repo.get_by_refresh_token(db, rehash_token)
+        search_in_db_token = await self.t_repo.get_by_token(db, rehash_token)
 
         if not search_in_db_token:
             raise HTTPException(status_code=401, detail="Token not found")

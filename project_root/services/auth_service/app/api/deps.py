@@ -5,7 +5,7 @@ from app.services.users_services import UserServices
 from app.core.jwt_core import decode_token
 from app.db.session import get_db
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException,Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import JWTError, ExpiredSignatureError, jwt
@@ -26,12 +26,19 @@ def get_user_service():
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
+    token = request.cookies.get("access_token")
+
+    if token is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated",
+        )
     try:
-        payload = decode_token(token)
-        user_id: int = payload.get("user_id")
+        payload = decode_token(token,"access")
+        user_id = int(payload.get("sub"))
 
         if user_id is None:
             raise HTTPException(

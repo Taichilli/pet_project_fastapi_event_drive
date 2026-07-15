@@ -48,6 +48,14 @@ async def login_user(
         max_age=7 * 24 * 60 * 60,
 
     )
+    response.set_cookie(
+        key="access_token",
+        value=login_response["access_token"],
+        httponly=True,
+        secure=False,
+        samesite="Lax",
+        max_age=15 * 60,
+    )
 
     return {
         "access_token": login_response["access_token"],
@@ -72,6 +80,14 @@ async def refresh_user(
         refresh_token_response = await service.refresh_token(db,refresh_token)
 
         response.set_cookie(
+            key="access_token",
+            value=refresh_token_response["access_token"],
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            max_age=15 * 60,
+        )
+        response.set_cookie(
             key="refresh_token",
             value=refresh_token_response["refresh_token"],
             httponly=True,
@@ -79,6 +95,7 @@ async def refresh_user(
             samesite="Lax",
             max_age=7 * 24 * 60 * 60,
         )
+
 
         return {
             "access_token": refresh_token_response["access_token"],
@@ -102,11 +119,18 @@ async def logout(
         await service.logout(db,refresh_token)
 
         response.delete_cookie(
+            key="access_token",
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+        )
+        response.delete_cookie(
             key="refresh_token",
             httponly=True,
             secure=False,
             samesite="Lax",
         )
+
 
         return {"message": "logout successful"}
 
@@ -124,8 +148,14 @@ async def logout_all(
                 detail="No refresh token"
         )
 
-        await service.logout_all(db,refresh_token)
+        await service.logout_all_devices(db,refresh_token)
 
+        response.delete_cookie(
+            key="access_token",
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+        )
         response.delete_cookie(
             key="refresh_token",
             httponly=True,
